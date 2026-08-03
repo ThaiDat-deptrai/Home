@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HomeKit – Kịch bản</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/kichban.css" />
+</head>
+<body>
+
+<div class="app-container">
+    <header class="header">
+        <h1>🎬 Kịch bản</h1>
+        <div class="header-actions">
+            <i class="fas fa-plus" id="addSceneBtn" title="Thêm kịch bản"></i>
+        </div>
+    </header>
+
+    <section>
+        <h2 class="section-title">Danh sách kịch bản</h2>
+        <div class="scene-list" id="sceneList"></div>
+    </section>
+
+    <div class="footer-note"><i class="fas fa-magic"></i> Tự động hóa ngôi nhà của bạn</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h2 id="modalTitle">Tạo kịch bản mới</h2>
+        <form id="sceneForm">
+            <label>Tên kịch bản</label>
+            <input type="text" id="sceneName" placeholder="Ví dụ: Xem phim" required />
+
+            <label>Biểu tượng</label>
+            <select id="sceneIconSelect">
+                <option value="fa-film">🎬 Phim</option>
+                <option value="fa-moon">🌙 Ngủ</option>
+                <option value="fa-door-open">🚪 Rời nhà</option>
+                <option value="fa-glass-cheers">🥂 Tiệc</option>
+                <option value="fa-lightbulb">💡 Đèn</option>
+                <option value="fa-fan">🌀 Quạt</option>
+                <option value="fa-plug">🔌 Ổ cắm</option>
+                <option value="fa-tv">📺 TV</option>
+                <option value="fa-snowflake">❄️ Máy lạnh</option>
+                <option value="fa-wind">💨 Rèm</option>
+                <option value="fa-lamp">🪔 Đèn bàn</option>
+                <option value="fa-camera">📷 Camera</option>
+                <option value="fa-lock">🔒 Khóa</option>
+                <option value="fa-unlock">🔓 Mở khóa</option>
+                <option value="fa-music">🎵 Nhạc</option>
+                <option value="fa-volume-up">🔊 Loa</option>
+                <option value="fa-microphone">🎤 Micro</option>
+                <option value="fa-thermometer-half">🌡️ Nhiệt độ</option>
+                <option value="fa-clock">🕒 Đồng hồ</option>
+                <option value="fa-bell">🔔 Chuông</option>
+                <option value="fa-cog">⚙️ Cài đặt</option>
+                <option value="fa-home">🏠 Nhà</option>
+                <option value="fa-user">👤 Người</option>
+                <option value="fa-chair">🪑 Ghế</option>
+                <option value="fa-bed">🛏️ Giường</option>
+                <option value="fa-couch">🛋️ Sofa</option>
+                <option value="fa-dumbbell">🏋️ Tạ</option>
+                <option value="fa-star">⭐ Sao</option>
+                <option value="fa-heart">❤️ Tim</option>
+                <option value="fa-fire">🔥 Lửa</option>
+            </select>
+
+            <label>Chọn thiết bị kích hoạt</label>
+            <div class="device-checkboxes" id="deviceCheckboxes"></div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="modalCancel">Hủy</button>
+                <button type="submit" class="btn-save" id="modalSave">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="nhietdo.html" class="nav-item"><i class="fas fa-thermometer-half"></i><span>Nhiệt độ</span></a>
+    <a href="kichban.html" class="nav-item active"><i class="fas fa-magic"></i><span>Kịch bản</span></a>
+    <a href="troly.html" class="nav-item"><i class="fas fa-microphone"></i><span>Trợ lý</span></a>
+    <a href="caidat.html" class="nav-item"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
+</nav>
+
+<script src="js/kichban.js"></script>
+</body>
+</html>
