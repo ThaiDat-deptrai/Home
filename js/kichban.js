@@ -65,6 +65,19 @@
         window.dispatchEvent(new Event('storage'));
     }
 
+    // ===== GỬI CẤU HÌNH XUỐNG MASTER =====
+    function sendSceneConfigToMaster(sceneData) {
+        // Kiểm tra xem index.js đã load và có hàm sendSceneConfig chưa
+        if (typeof window.sendSceneConfig === 'function') {
+            window.sendSceneConfig(sceneData);
+            console.log('📤 Đã gửi cấu hình kịch bản xuống Master');
+            return true;
+        } else {
+            console.warn('⚠️ Chưa kết nối MQTT, không gửi được cấu hình');
+            return false;
+        }
+    }
+
     function renderScenes() {
         const container = document.getElementById('sceneList');
         if (scenes.length === 0) {
@@ -106,6 +119,7 @@
             btn.addEventListener('click', function() {
                 if (confirm('Bạn có chắc muốn xóa kịch bản này?')) {
                     const idx = parseInt(this.dataset.index);
+                    const deletedScene = scenes[idx];
                     scenes.splice(idx, 1);
                     saveScenes();
                     renderScenes();
@@ -121,6 +135,15 @@
         showToast(`✅ Đã chạy kịch bản "${scene.name}"`);
         localStorage.setItem('lastScene', JSON.stringify(scene));
         window.dispatchEvent(new Event('storage'));
+        
+        // Gửi cấu hình và chạy kịch bản qua index.js
+        if (typeof window.applyScene === 'function') {
+            window.applyScene(scene);
+        } else {
+            // Fallback: nếu index.js chưa load, chỉ gửi tên
+            console.warn('⚠️ index.js chưa load, chỉ gửi tên kịch bản');
+            // Có thể gửi MQTT trực tiếp ở đây nếu cần
+        }
     }
 
     // ===== MODAL =====
@@ -189,6 +212,9 @@
         renderScenes();
         closeModal();
         showToast(editingIndex !== null ? 'Đã cập nhật kịch bản' : 'Đã thêm kịch bản mới');
+
+        // ===== GỬI CẤU HÌNH XUỐNG MASTER NGAY KHI TẠO =====
+        sendSceneConfigToMaster(newScene);
     });
 
     function openEditModal(index) {
@@ -230,7 +256,6 @@
     window.addEventListener('storage', function(e) {
         if (e.key === 'customSwitches') {
             // Cập nhật danh sách thiết bị khi có thay đổi
-            // (sẽ được lấy mới khi mở modal)
         }
     });
 })();
