@@ -123,6 +123,42 @@
         }
     };
 
+    // ===== MAPPING ROOM -> ID & DEVICE -> ID =====
+    function getRoomId(roomName) {
+        const map = {
+            'phong-ngu-1': 1,
+            'phong-ngu-2': 2,
+            'phong-trung-tam': 3,
+            'phong-khach': 4
+        };
+        return map[roomName] || 0;
+    }
+
+    function getDeviceId(roomName, deviceName) {
+        const map = {
+            'phong-ngu-1': {
+                'Đèn ngủ': 1,
+                'Đèn tủ': 2,
+                'Đèn giường': 3,
+                'Đèn cây': 4
+            },
+            'phong-ngu-2': {
+                'Đèn học': 1,
+                'Đèn ngủ': 2,
+                'Đèn decor': 3
+            },
+            'phong-trung-tam': {
+                'Đèn trần': 1,
+                'Đèn trang trí': 2,
+                'Đèn thờ': 3
+            },
+            'phong-khach': {
+                'Đèn chùm': 1
+            }
+        };
+        return (map[roomName] && map[roomName][deviceName]) || 0;
+    }
+
     // ===== BIẾN TOÀN CỤC =====
     let roomDevices = {};
     let mqttClient = null;
@@ -161,7 +197,61 @@
         });
     }
 
-    // ===== HÀM ÁP DỤNG KỊCH BẢN (CÁCH MỚI - CHỈ GỬI TÊN) =====
+    // ===== GỬI CẤU HÌNH KỊCH BẢN XUỐNG MASTER =====
+    function sendSceneConfig(sceneData) {
+        if (!mqttConnected || !mqttClient) {
+            console.warn('⚠️ MQTT chưa kết nối, không gửi được cấu hình');
+            return false;
+        }
+
+        // Chuyển tên kịch bản thành mã
+        const sceneCode = sceneData.name.toUpperCase().replace(/ /g, '_');
+
+        // Tạo payload
+        const actions = sceneData.devices.map(item => ({
+            room: getRoomId(item.room),
+            device: getDeviceId(item.room, item.name),
+            cmd: item.state ? 1 : 0
+        }));
+
+        const payload = JSON.stringify({
+            name: sceneCode,
+            actions: actions
+        });
+
+        const topic = "nha/kich-ban/cau-hinh";
+        const msg = new Paho.MQTT.Message(payload);
+        msg.destinationName = topic;
+        mqttClient.send(msg);
+        console.log(`📤 Sent Scene Config: ${topic} -> ${payload}`);
+        return true;
+    }
+
+    // ===== GỬI LỆNH KỊCH BẢN QUA MQTT =====
+    function sendSceneCommand(sceneName) {
+        if (!mqttConnected || !mqttClient) {
+            console.warn('⚠️ MQTT chưa kết nối, không gửi được lệnh kịch bản');
+            return;
+        }
+
+        const sceneCode = sceneName.toUpperCase().replace(/ /g, '_');
+        const sceneMap = {
+            'XEM_PHIM': 'XEM_PHIM',
+            'DI_NGU': 'DI_NGU',
+            'ROI_NHA': 'ROI_NHA',
+            'TIEC_TUNG': 'TIEC_TUNG'
+        };
+        const finalCode = sceneMap[sceneCode] || sceneCode;
+
+        const payload = JSON.stringify({ scene: finalCode });
+        const topic = "nha/kich-ban/lenh";
+        const msg = new Paho.MQTT.Message(payload);
+        msg.destinationName = topic;
+        mqttClient.send(msg);
+        console.log(`📤 Sent MQTT Scene: ${topic} -> ${payload}`);
+    }
+
+    // ===== HÀM ÁP DỤNG KỊCH BẢN =====
     function applyScene(sceneData) {
         if (!sceneData || !sceneData.name) {
             showToast('⚠️ Kịch bản không hợp lệ');
@@ -197,39 +287,16 @@
             }
         }
 
-        // 3. Gửi tên kịch bản qua MQTT (CHỈ 1 GÓI DUY NHẤT)
+        // 3. Gửi cấu hình xuống Master (để Master lưu vào SPIFFS)
+        sendSceneConfig(sceneData);
+
+        // 4. Gửi lệnh chạy kịch bản
         sendSceneCommand(sceneData.name);
 
         showToast(`✅ Đã chạy kịch bản "${sceneData.name}"`);
     }
 
-    // ===== GỬI LỆNH KỊCH BẢN QUA MQTT =====
-    function sendSceneCommand(sceneName) {
-        if (!mqttConnected || !mqttClient) {
-            console.warn('⚠️ MQTT chưa kết nối, không gửi được lệnh kịch bản');
-            return;
-        }
-
-        // Chuyển tên kịch bản thành mã (ví dụ: "Xem phim" -> "XEM_PHIM")
-        const sceneCode = sceneName.toUpperCase().replace(/ /g, '_');
-        // Một số trường hợp đặc biệt
-        const sceneMap = {
-            'XEM_PHIM': 'XEM_PHIM',
-            'ĐI_NGỦ': 'DI_NGU',
-            'RỜI_NHÀ': 'ROI_NHA',
-            'TIỆC_TÙNG': 'TIEC_TUNG'
-        };
-        const finalCode = sceneMap[sceneCode] || sceneCode;
-
-        const payload = JSON.stringify({ scene: finalCode });
-        const topic = "nha/kich-ban/lenh";
-        const msg = new Paho.MQTT.Message(payload);
-        msg.destinationName = topic;
-        mqttClient.send(msg);
-        console.log(`📤 Sent MQTT Scene: ${topic} -> ${payload}`);
-    }
-
-    // ===== GỬI LỆNH MQTT CHO TỪNG THIẾT BỊ (GIỮ NGUYÊN CHO TOGGLE) =====
+    // ===== GỬI LỆNH MQTT CHO TỪNG THIẾT BỊ =====
     function sendMQTTCommand(room, deviceName, state) {
         if (!mqttConnected || !mqttClient) {
             console.warn('⚠️ MQTT chưa kết nối, không gửi được lệnh');
@@ -290,7 +357,6 @@
                 renderDevices(room);
                 highlightRoom(room);
 
-                // ===== GỬI LỆNH MQTT CHO TỪNG THIẾT BỊ =====
                 sendMQTTCommand(room, dev.name, dev.on);
 
                 if (dev.type === 'custom') {
@@ -418,6 +484,8 @@
                 allTopics.push(topicMapping[room][device].state);
             }
         }
+        // Thêm topic nhận cấu hình (để biết Master đã nhận thành công - tùy chọn)
+        allTopics.push('nha/kich-ban/phan-hoi');
         allTopics.forEach(topic => {
             mqttClient.subscribe(topic);
             console.log(`📡 Subscribed: ${topic}`);
@@ -427,7 +495,14 @@
     function handleMQTTMessage(topic, payload) {
         try {
             const data = JSON.parse(payload);
-            // Tìm device từ topic
+            
+            // Kiểm tra phản hồi từ Master (nếu có)
+            if (topic === 'nha/kich-ban/phan-hoi') {
+                console.log('📥 Phản hồi từ Master:', data);
+                return;
+            }
+            
+            // Tìm device từ topic state
             for (const room in topicMapping) {
                 for (const deviceName in topicMapping[room]) {
                     if (topicMapping[room][deviceName].state === topic) {
@@ -435,7 +510,6 @@
                         if (device) {
                             device.on = data.state || false;
                             device.status = device.on ? 'Đang bật' : 'Đang tắt';
-                            // Cập nhật giao diện nếu đang hiển thị phòng này
                             const activeRoom = document.querySelector('.room-btn.active');
                             if (activeRoom && activeRoom.dataset.room === room) {
                                 renderDevices(room);
@@ -476,6 +550,11 @@
         loadMyScenes();
         loadSettings();
         connectMQTT();
+        
+        // Export function để kichban.js gọi
+        window.sendSceneConfig = sendSceneConfig;
+        window.mqttConnected = () => mqttConnected;
+        window.applyScene = applyScene;
     }
 
     // ===== LẮNG NGHE SỰ KIỆN STORAGE =====
