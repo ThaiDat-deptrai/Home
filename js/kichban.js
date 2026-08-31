@@ -1,6 +1,46 @@
 (function() {
     'use strict';
 
+    // ===== HÀM XÓA DẤU TIẾNG VIỆT =====
+    function removeAccents(str) {
+        const map = {
+            'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+            'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+            'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+            'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+            'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+            'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+            'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+            'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+            'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+            'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+            'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+            'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            'đ': 'd',
+            'Á': 'A', 'À': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+            'Ă': 'A', 'Ắ': 'A', 'Ằ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+            'Â': 'A', 'Ấ': 'A', 'Ầ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+            'É': 'E', 'È': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+            'Ê': 'E', 'Ế': 'E', 'Ề': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+            'Í': 'I', 'Ì': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+            'Ó': 'O', 'Ò': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+            'Ô': 'O', 'Ố': 'O', 'Ồ': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+            'Ơ': 'O', 'Ớ': 'O', 'Ờ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+            'Ú': 'U', 'Ù': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+            'Ư': 'U', 'Ứ': 'U', 'Ừ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+            'Ý': 'Y', 'Ỳ': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+            'Đ': 'D'
+        };
+        return str.replace(/[^a-zA-Z0-9 ]/g, function(ch) {
+            return map[ch] || ch;
+        });
+    }
+
+    // ===== CHUẨN HÓA TÊN KỊCH BẢN =====
+    function normalizeSceneName(name) {
+        return removeAccents(name).toUpperCase().replace(/ /g, '_');
+    }
+
     // ===== HÀM LẤY DANH SÁCH THIẾT BỊ ĐỘNG =====
     function getAllDevices() {
         const base = [
@@ -67,9 +107,13 @@
 
     // ===== GỬI CẤU HÌNH XUỐNG MASTER =====
     function sendSceneConfigToMaster(sceneData) {
-        // Kiểm tra xem index.js đã load và có hàm sendSceneConfig chưa
         if (typeof window.sendSceneConfig === 'function') {
-            window.sendSceneConfig(sceneData);
+            // Chuẩn hóa tên trước khi gửi
+            const normalizedData = {
+                ...sceneData,
+                name: normalizeSceneName(sceneData.name)
+            };
+            window.sendSceneConfig(normalizedData);
             console.log('📤 Đã gửi cấu hình kịch bản xuống Master');
             return true;
         } else {
@@ -119,7 +163,6 @@
             btn.addEventListener('click', function() {
                 if (confirm('Bạn có chắc muốn xóa kịch bản này?')) {
                     const idx = parseInt(this.dataset.index);
-                    const deletedScene = scenes[idx];
                     scenes.splice(idx, 1);
                     saveScenes();
                     renderScenes();
@@ -136,13 +179,15 @@
         localStorage.setItem('lastScene', JSON.stringify(scene));
         window.dispatchEvent(new Event('storage'));
         
-        // Gửi cấu hình và chạy kịch bản qua index.js
         if (typeof window.applyScene === 'function') {
-            window.applyScene(scene);
+            // Chuẩn hóa tên trước khi gửi
+            const normalizedScene = {
+                ...scene,
+                name: normalizeSceneName(scene.name)
+            };
+            window.applyScene(normalizedScene);
         } else {
-            // Fallback: nếu index.js chưa load, chỉ gửi tên
             console.warn('⚠️ index.js chưa load, chỉ gửi tên kịch bản');
-            // Có thể gửi MQTT trực tiếp ở đây nếu cần
         }
     }
 
