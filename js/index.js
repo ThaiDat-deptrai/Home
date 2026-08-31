@@ -1,46 +1,163 @@
 (function() {
     'use strict';
 
-    // ===== HÀM XÓA DẤU TIẾNG VIỆT =====
-    function removeAccents(str) {
-        const map = {
-            'á':'a','à':'a','ả':'a','ã':'a','ạ':'a','ă':'a','ắ':'a','ằ':'a','ẳ':'a','ẵ':'a','ặ':'a',
-            'â':'a','ấ':'a','ầ':'a','ẩ':'a','ẫ':'a','ậ':'a','é':'e','è':'e','ẻ':'e','ẽ':'e','ẹ':'e',
-            'ê':'e','ế':'e','ề':'e','ể':'e','ễ':'e','ệ':'e','í':'i','ì':'i','ỉ':'i','ĩ':'i','ị':'i',
-            'ó':'o','ò':'o','ỏ':'o','õ':'o','ọ':'o','ô':'o','ố':'o','ồ':'o','ổ':'o','ỗ':'o','ộ':'o',
-            'ơ':'o','ớ':'o','ờ':'o','ở':'o','ỡ':'o','ợ':'o','ú':'u','ù':'u','ủ':'u','ũ':'u','ụ':'u',
-            'ư':'u','ứ':'u','ừ':'u','ử':'u','ữ':'u','ự':'u','ý':'y','ỳ':'y','ỷ':'y','ỹ':'y','ỵ':'y',
-            'đ':'d','Á':'A','À':'A','Ả':'A','Ã':'A','Ạ':'A','Ă':'A','Ắ':'A','Ằ':'A','Ẳ':'A','Ẵ':'A','Ặ':'A',
-            'Â':'A','Ấ':'A','Ầ':'A','Ẩ':'A','Ẫ':'A','Ậ':'A','É':'E','È':'E','Ẻ':'E','Ẽ':'E','Ẹ':'E',
-            'Ê':'E','Ế':'E','Ề':'E','Ể':'E','Ễ':'E','Ệ':'E','Í':'I','Ì':'I','Ỉ':'I','Ĩ':'I','Ị':'I',
-            'Ó':'O','Ò':'O','Ỏ':'O','Õ':'O','Ọ':'O','Ô':'O','Ố':'O','Ồ':'O','Ổ':'O','Ỗ':'O','Ộ':'O',
-            'Ơ':'O','Ớ':'O','Ờ':'O','Ở':'O','Ỡ':'O','Ợ':'O','Ú':'U','Ù':'U','Ủ':'U','Ũ':'U','Ụ':'U',
-            'Ư':'U','Ứ':'U','Ừ':'U','Ử':'U','Ữ':'U','Ự':'U','Ý':'Y','Ỳ':'Y','Ỷ':'Y','Ỹ':'Y','Ỵ':'Y','Đ':'D'
-        };
-        return str.replace(/[^a-zA-Z0-9 ]/g, function(ch) {
-            return map[ch] || ch;
-        });
-    }
-
-    function normalizeSceneName(name) {
-        return removeAccents(name).toUpperCase().replace(/ /g, '_');
-    }
-
     // ===== DANH SÁCH THIẾT BỊ CỐ ĐỊNH =====
-    const baseDevices = { /* ... giữ nguyên như bạn đã có ... */ };
+    const baseDevices = {
+        'phong-ngu-1': [
+            { name: 'Đèn ngủ', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn tủ', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn giường', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn cây', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' }
+        ],
+        'phong-ngu-2': [
+            { name: 'Đèn học', icon: 'fa-lamp', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn ngủ', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn decor', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' }
+        ],
+        'phong-trung-tam': [
+            { name: 'Đèn trần', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn trang trí', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' },
+            { name: 'Đèn thờ', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' }
+        ],
+        'phong-khach': [
+            { name: 'Đèn chùm', icon: 'fa-lightbulb', status: 'Đang tắt', on: false, type: 'light' }
+        ]
+    };
 
     // ===== KỊCH BẢN MẶC ĐỊNH =====
-    const scenesPreset = { /* ... giữ nguyên ... */ };
+    const scenesPreset = {
+        movie: {
+            name: 'Xem phim',
+            devices: [
+                { room: 'phong-ngu-1', name: 'Đèn ngủ', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn tủ', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn giường', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn cây', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn học', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn ngủ', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn decor', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trần', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trang trí', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn thờ', state: false },
+                { room: 'phong-khach', name: 'Đèn chùm', state: false }
+            ]
+        },
+        sleep: {
+            name: 'Đi ngủ',
+            devices: [
+                { room: 'phong-ngu-1', name: 'Đèn ngủ', state: true },
+                { room: 'phong-ngu-1', name: 'Đèn tủ', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn giường', state: true },
+                { room: 'phong-ngu-1', name: 'Đèn cây', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn học', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn ngủ', state: true },
+                { room: 'phong-ngu-2', name: 'Đèn decor', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trần', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trang trí', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn thờ', state: false },
+                { room: 'phong-khach', name: 'Đèn chùm', state: false }
+            ]
+        },
+        leave: {
+            name: 'Rời nhà',
+            devices: [
+                { room: 'phong-ngu-1', name: 'Đèn ngủ', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn tủ', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn giường', state: false },
+                { room: 'phong-ngu-1', name: 'Đèn cây', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn học', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn ngủ', state: false },
+                { room: 'phong-ngu-2', name: 'Đèn decor', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trần', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn trang trí', state: false },
+                { room: 'phong-trung-tam', name: 'Đèn thờ', state: false },
+                { room: 'phong-khach', name: 'Đèn chùm', state: false }
+            ]
+        },
+        party: {
+            name: 'Tiệc tùng',
+            devices: [
+                { room: 'phong-ngu-1', name: 'Đèn ngủ', state: true },
+                { room: 'phong-ngu-1', name: 'Đèn tủ', state: true },
+                { room: 'phong-ngu-1', name: 'Đèn giường', state: true },
+                { room: 'phong-ngu-1', name: 'Đèn cây', state: true },
+                { room: 'phong-ngu-2', name: 'Đèn học', state: true },
+                { room: 'phong-ngu-2', name: 'Đèn ngủ', state: true },
+                { room: 'phong-ngu-2', name: 'Đèn decor', state: true },
+                { room: 'phong-trung-tam', name: 'Đèn trần', state: true },
+                { room: 'phong-trung-tam', name: 'Đèn trang trí', state: true },
+                { room: 'phong-trung-tam', name: 'Đèn thờ', state: true },
+                { room: 'phong-khach', name: 'Đèn chùm', state: true }
+            ]
+        }
+    };
 
     // ===== CẤU HÌNH MQTT =====
-    const mqttConfig = { ... };
+    const mqttConfig = {
+        broker: "wss://130d14182c00498e952cad93f9325420.s1.eu.hivemq.cloud:8884/mqtt",
+        username: "Dut09",
+        password: "Dat1020192020",
+        clientId: "WebDashboard_" + Math.random().toString(16).substr(2, 8)
+    };
 
-    // ===== MAPPING ROOM & DEVICE =====
-    const topicMapping = { ... };
+    // ===== MAPPING ROOM & DEVICE (TIẾNG VIỆT) =====
+    const topicMapping = {
+        'phong-ngu-1': {
+            'Đèn ngủ': { cmd: 'nha/phong-ngu-1/den-ngu/cmd', state: 'nha/phong-ngu-1/den-ngu/state' },
+            'Đèn tủ': { cmd: 'nha/phong-ngu-1/den-tu/cmd', state: 'nha/phong-ngu-1/den-tu/state' },
+            'Đèn giường': { cmd: 'nha/phong-ngu-1/den-giuong/cmd', state: 'nha/phong-ngu-1/den-giuong/state' },
+            'Đèn cây': { cmd: 'nha/phong-ngu-1/den-cay/cmd', state: 'nha/phong-ngu-1/den-cay/state' }
+        },
+        'phong-ngu-2': {
+            'Đèn học': { cmd: 'nha/phong-ngu-2/den-hoc/cmd', state: 'nha/phong-ngu-2/den-hoc/state' },
+            'Đèn ngủ': { cmd: 'nha/phong-ngu-2/den-ngu/cmd', state: 'nha/phong-ngu-2/den-ngu/state' },
+            'Đèn decor': { cmd: 'nha/phong-ngu-2/den-decor/cmd', state: 'nha/phong-ngu-2/den-decor/state' }
+        },
+        'phong-trung-tam': {
+            'Đèn trần': { cmd: 'nha/phong-trung-tam/den-tran/cmd', state: 'nha/phong-trung-tam/den-tran/state' },
+            'Đèn trang trí': { cmd: 'nha/phong-trung-tam/den-trang-tri/cmd', state: 'nha/phong-trung-tam/den-trang-tri/state' },
+            'Đèn thờ': { cmd: 'nha/phong-trung-tam/den-tho/cmd', state: 'nha/phong-trung-tam/den-tho/state' }
+        },
+        'phong-khach': {
+            'Đèn chùm': { cmd: 'nha/phong-khach/den-chum/cmd', state: 'nha/phong-khach/den-chum/state' }
+        }
+    };
 
-    // ===== HÀM MAP =====
-    function getRoomId(roomName) { ... }
-    function getDeviceId(roomName, deviceName) { ... }
+    // ===== MAPPING ROOM -> ID & DEVICE -> ID =====
+    function getRoomId(roomName) {
+        const map = {
+            'phong-ngu-1': 1,
+            'phong-ngu-2': 2,
+            'phong-trung-tam': 3,
+            'phong-khach': 4
+        };
+        return map[roomName] || 0;
+    }
+
+    function getDeviceId(roomName, deviceName) {
+        const map = {
+            'phong-ngu-1': {
+                'Đèn ngủ': 1,
+                'Đèn tủ': 2,
+                'Đèn giường': 3,
+                'Đèn cây': 4
+            },
+            'phong-ngu-2': {
+                'Đèn học': 1,
+                'Đèn ngủ': 2,
+                'Đèn decor': 3
+            },
+            'phong-trung-tam': {
+                'Đèn trần': 1,
+                'Đèn trang trí': 2,
+                'Đèn thờ': 3
+            },
+            'phong-khach': {
+                'Đèn chùm': 1
+            }
+        };
+        return (map[roomName] && map[roomName][deviceName]) || 0;
+    }
 
     // ===== BIẾN TOÀN CỤC =====
     let roomDevices = {};
@@ -53,20 +170,44 @@
     const appContainer = document.getElementById('appContainer');
     const myScenesContainer = document.getElementById('myScenesContainer');
 
-    // ===== HÀM LẤY CÔNG TẮC =====
-    function getCustomSwitches() { ... }
+    // ===== HÀM LẤY CÔNG TẮC TỪ LOCALSTORAGE =====
+    function getCustomSwitches() {
+        try {
+            return JSON.parse(localStorage.getItem('customSwitches')) || [];
+        } catch { return []; }
+    }
 
     // ===== KHỞI TẠO roomDevices =====
-    function buildRoomDevices() { ... }
+    function buildRoomDevices() {
+        roomDevices = JSON.parse(JSON.stringify(baseDevices));
+        const switches = getCustomSwitches();
+        switches.forEach(sw => {
+            const room = sw.room;
+            if (!roomDevices[room]) roomDevices[room] = [];
+            const exists = roomDevices[room].some(d => d.name === sw.name);
+            if (!exists) {
+                roomDevices[room].push({
+                    name: sw.name,
+                    icon: sw.icon || 'fa-lightbulb',
+                    status: sw.on ? 'Đang bật' : 'Đang tắt',
+                    on: sw.on || false,
+                    type: 'custom'
+                });
+            }
+        });
+    }
 
-    // ===== GỬI CẤU HÌNH KỊCH BẢN =====
+    // ===== GỬI CẤU HÌNH KỊCH BẢN XUỐNG MASTER =====
     function sendSceneConfig(sceneData) {
         if (!mqttConnected || !mqttClient) {
             console.warn('⚠️ MQTT chưa kết nối, không gửi được cấu hình');
             return false;
         }
 
-        const sceneCode = normalizeSceneName(sceneData.name);
+        // Chuyển tên kịch bản thành mã
+        const sceneCode = sceneData.name.toUpperCase().replace(/ /g, '_');
+
+        // Tạo payload
         const actions = sceneData.devices.map(item => ({
             room: getRoomId(item.room),
             device: getDeviceId(item.room, item.name),
@@ -86,14 +227,23 @@
         return true;
     }
 
-    // ===== GỬI LỆNH KỊCH BẢN =====
+    // ===== GỬI LỆNH KỊCH BẢN QUA MQTT =====
     function sendSceneCommand(sceneName) {
         if (!mqttConnected || !mqttClient) {
-            console.warn('⚠️ MQTT chưa kết nối, không gửi được lệnh');
+            console.warn('⚠️ MQTT chưa kết nối, không gửi được lệnh kịch bản');
             return;
         }
-        const sceneCode = normalizeSceneName(sceneName);
-        const payload = JSON.stringify({ scene: sceneCode });
+
+        const sceneCode = sceneName.toUpperCase().replace(/ /g, '_');
+        const sceneMap = {
+            'XEM_PHIM': 'XEM_PHIM',
+            'DI_NGU': 'DI_NGU',
+            'ROI_NHA': 'ROI_NHA',
+            'TIEC_TUNG': 'TIEC_TUNG'
+        };
+        const finalCode = sceneMap[sceneCode] || sceneCode;
+
+        const payload = JSON.stringify({ scene: finalCode });
         const topic = "nha/kich-ban/lenh";
         const msg = new Paho.MQTT.Message(payload);
         msg.destinationName = topic;
@@ -101,13 +251,14 @@
         console.log(`📤 Sent MQTT Scene: ${topic} -> ${payload}`);
     }
 
-    // ===== ÁP DỤNG KỊCH BẢN =====
+    // ===== HÀM ÁP DỤNG KỊCH BẢN =====
     function applyScene(sceneData) {
         if (!sceneData || !sceneData.name) {
             showToast('⚠️ Kịch bản không hợp lệ');
             return;
         }
 
+        // 1. Cập nhật giao diện (bật/tắt ảo trên web)
         if (sceneData.devices) {
             sceneData.devices.forEach(item => {
                 const room = item.room;
@@ -123,6 +274,7 @@
             });
         }
 
+        // 2. Cập nhật giao diện
         const activeRoom = document.querySelector('.room-btn.active');
         if (activeRoom) {
             renderDevices(activeRoom.dataset.room);
@@ -135,7 +287,10 @@
             }
         }
 
+        // 3. Gửi cấu hình xuống Master (để Master lưu vào SPIFFS)
         sendSceneConfig(sceneData);
+
+        // 4. Gửi lệnh chạy kịch bản
         sendSceneCommand(sceneData.name);
 
         showToast(`✅ Đã chạy kịch bản "${sceneData.name}"`);
@@ -168,13 +323,79 @@
     }
 
     // ===== RENDER THIẾT BỊ =====
-    function renderDevices(roomKey) { /* ... giữ nguyên ... */ }
+    function renderDevices(roomKey) {
+        const devices = roomDevices[roomKey];
+        if (!devices || devices.length === 0) {
+            deviceGrid.innerHTML = '<p style="color:#4a5a7a;padding:20px;">Phòng này chưa có thiết bị.</p>';
+            return;
+        }
+        let html = '';
+        devices.forEach((dev, index) => {
+            const statusText = dev.on ? 'Đang bật' : 'Đang tắt';
+            const toggleClass = dev.on ? 'active' : '';
+            html += `
+                <div class="device-card" data-device-index="${index}" data-room="${roomKey}">
+                    <div class="device-icon"><i class="fas ${dev.icon}"></i></div>
+                    <div class="device-name">${dev.name}</div>
+                    <div class="device-status">${statusText}</div>
+                    <div class="toggle-wrapper">
+                        <button class="toggle ${toggleClass}" data-index="${index}" data-room="${roomKey}"></button>
+                    </div>
+                </div>
+            `;
+        });
+        deviceGrid.innerHTML = html;
 
-    function updateCustomSwitchState(room, name, state) { ... }
-    function highlightRoom(roomKey) { ... }
-    function handleRoomClick(roomKey) { ... }
+        deviceGrid.querySelectorAll('.toggle').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const room = this.dataset.room;
+                const idx = parseInt(this.dataset.index);
+                const dev = roomDevices[room][idx];
+                dev.on = !dev.on;
+                dev.status = dev.on ? 'Đang bật' : 'Đang tắt';
+                renderDevices(room);
+                highlightRoom(room);
 
-    // ===== LOAD KỊCH BẢN =====
+                sendMQTTCommand(room, dev.name, dev.on);
+
+                if (dev.type === 'custom') {
+                    updateCustomSwitchState(room, dev.name, dev.on);
+                }
+                if (localStorage.getItem('soundEnabled') !== 'false') playClickSound();
+            });
+        });
+    }
+
+    function updateCustomSwitchState(room, name, state) {
+        let switches = getCustomSwitches();
+        const sw = switches.find(s => s.room === room && s.name === name);
+        if (sw) {
+            sw.on = state;
+            localStorage.setItem('customSwitches', JSON.stringify(switches));
+            window.dispatchEvent(new Event('storage'));
+        }
+    }
+
+    function highlightRoom(roomKey) {
+        roomGrid.querySelectorAll('.room-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.room === roomKey);
+        });
+    }
+
+    function handleRoomClick(roomKey) {
+        const roomName = {
+            'phong-ngu-1': 'Phòng ngủ 1',
+            'phong-ngu-2': 'Phòng ngủ 2',
+            'phong-trung-tam': 'Phòng trung tâm',
+            'phong-khach': 'Phòng khách'
+        }[roomKey] || roomKey;
+        roomTitle.textContent = roomName;
+        renderDevices(roomKey);
+        highlightRoom(roomKey);
+    }
+
+    // ===== LOAD KỊCH BẢN TỪ localStorage =====
     function loadMyScenes() {
         const scenes = JSON.parse(localStorage.getItem('scenes')) || [];
         if (scenes.length === 0) {
@@ -195,7 +416,7 @@
         });
     }
 
-    // ===== SỰ KIỆN NHANH =====
+    // ===== SỰ KIỆN CHO CÁC KỊCH BẢN NHANH =====
     document.querySelectorAll('.scene-card').forEach(card => {
         card.addEventListener('click', function() {
             const sceneKey = this.dataset.scene;
@@ -208,7 +429,7 @@
         });
     });
 
-    // ===== SỰ KIỆN PHÒNG =====
+    // ===== SỰ KIỆN CHO PHÒNG =====
     roomGrid.querySelectorAll('.room-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             handleRoomClick(this.dataset.room);
@@ -263,6 +484,7 @@
                 allTopics.push(topicMapping[room][device].state);
             }
         }
+        // Thêm topic nhận cấu hình (để biết Master đã nhận thành công - tùy chọn)
         allTopics.push('nha/kich-ban/phan-hoi');
         allTopics.forEach(topic => {
             mqttClient.subscribe(topic);
@@ -273,10 +495,14 @@
     function handleMQTTMessage(topic, payload) {
         try {
             const data = JSON.parse(payload);
+            
+            // Kiểm tra phản hồi từ Master (nếu có)
             if (topic === 'nha/kich-ban/phan-hoi') {
                 console.log('📥 Phản hồi từ Master:', data);
                 return;
             }
+            
+            // Tìm device từ topic state
             for (const room in topicMapping) {
                 for (const deviceName in topicMapping[room]) {
                     if (topicMapping[room][deviceName].state === topic) {
@@ -325,12 +551,13 @@
         loadSettings();
         connectMQTT();
         
+        // Export function để kichban.js gọi
         window.sendSceneConfig = sendSceneConfig;
         window.mqttConnected = () => mqttConnected;
         window.applyScene = applyScene;
     }
 
-    // ===== LẮNG NGHE STORAGE =====
+    // ===== LẮNG NGHE SỰ KIỆN STORAGE =====
     window.addEventListener('storage', function(e) {
         if (e.key === 'scenes') {
             loadMyScenes();
@@ -385,12 +612,22 @@
     }
 
     // ===== TOAST & ÂM THANH =====
-    function showToast(msg) { ... }
-    function playClickSound() { ... }
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); color: white; padding: 14px 28px; border-radius: 40px; font-size: 16px; font-weight: 500; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: fadeInDown 0.4s ease;`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = '0.4s'; setTimeout(() => toast.remove(), 500); }, 2500);
+    }
+
+    function playClickSound() {
+        try { const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 800; osc.type = 'sine'; gain.gain.value = 0.1; osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.stop(audioCtx.currentTime + 0.05); } catch(e) {}
+    }
 
     const styleAnim = document.createElement('style');
     styleAnim.textContent = `@keyframes fadeInDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`;
     document.head.appendChild(styleAnim);
 
+    // Bắt đầu
     init();
 })();
