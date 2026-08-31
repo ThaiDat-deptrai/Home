@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HomeKit – Tự động hóa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/tu_dong_hoa.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="header">
+        <h1>🤖 Tự động hóa</h1>
+        <div class="header-actions">
+            <i class="fas fa-plus" id="addRuleBtn" title="Thêm quy tắc"></i>
+        </div>
+    </header>
+
+    <section>
+        <h2 class="section-title">Danh sách quy tắc</h2>
+        <div class="rule-list" id="ruleList"></div>
+        <div id="mqttStatus" class="mqtt-status">⏳ Đang kết nối MQTT...</div>
+    </section>
+
+    <div class="footer-note"><i class="fas fa-clock"></i> Tự động hóa ngôi nhà của bạn</div>
+</div>
+
+<!-- MODAL THÊM QUY TẮC -->
+<div class="modal-overlay" id="ruleModal">
+    <div class="modal">
+        <h2 id="modalTitle">Thêm quy tắc tự động</h2>
+        <form id="ruleForm">
+            <!-- 1. CHỌN THIẾT BỊ (NHIỀU) -->
+            <label>🔌 Chọn thiết bị</label>
+            <div class="device-grid" id="deviceGrid">
+                <!-- JS sẽ render -->
+            </div>
+
+            <!-- 2. LOẠI QUY TẮC -->
+            <label>🎯 Loại quy tắc</label>
+            <div class="radio-group" id="typeGroup">
+                <label><input type="radio" name="type" value="time" checked /> Giờ cố định</label>
+                <label><input type="radio" name="type" value="timer" /> Hẹn giờ</label>
+                <label><input type="radio" name="type" value="interval" /> Lặp chu kỳ</label>
+            </div>
+
+            <!-- 3. GIỜ CỐ ĐỊNH -->
+            <div id="timeConfig">
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                    <div style="flex:1;">
+                        <label>🔛 Bật lúc</label>
+                        <input type="time" id="ruleOnTime" step="1" value="06:30" />
+                    </div>
+                    <div style="flex:1;">
+                        <label>🔴 Tắt lúc</label>
+                        <input type="time" id="ruleOffTime" step="1" value="22:00" />
+                    </div>
+                </div>
+                <label>📅 Lặp lại</label>
+                <select id="ruleRepeat">
+                    <option value="once">Một lần</option>
+                    <option value="daily" selected>Hàng ngày</option>
+                </select>
+            </div>
+
+            <!-- 4. HẸN GIỜ -->
+            <div id="timerConfig" style="display:none;">
+                <label>⏱️ Hành động</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="timerAction" value="1" checked /> Bật sau</label>
+                    <label><input type="radio" name="timerAction" value="0" /> Tắt sau</label>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <label style="margin:0;">Thời gian</label>
+                    <input type="number" id="ruleDuration" value="30" min="1" max="1440" style="width:100px;" />
+                    <span>phút</span>
+                </div>
+            </div>
+
+            <!-- 5. LẶP CHU KỲ -->
+            <div id="intervalConfig" style="display:none;">
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                    <div style="flex:1;">
+                        <label>🟢 Bật trong</label>
+                        <input type="number" id="ruleOnDuration" value="5" min="1" style="width:100px;" />
+                        <span>giây</span>
+                    </div>
+                    <div style="flex:1;">
+                        <label>🔴 Tắt trong</label>
+                        <input type="number" id="ruleOffDuration" value="10" min="1" style="width:100px;" />
+                        <span>giây</span>
+                    </div>
+                </div>
+                <label>📅 Lặp lại</label>
+                <select id="ruleIntervalRepeat">
+                    <option value="always" selected>24/7</option>
+                    <option value="daily">Hàng ngày</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="ruleModalCancel">Hủy</button>
+                <button type="submit" class="btn-save">💾 Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="nhietdo.html" class="nav-item"><i class="fas fa-thermometer-half"></i><span>Nhiệt độ</span></a>
+    <a href="kichban.html" class="nav-item"><i class="fas fa-magic"></i><span>Kịch bản</span></a>
+    <a href="tu_dong_hoa.html" class="nav-item active"><i class="fas fa-clock"></i><span>Tự động</span></a>
+    <a href="caidat.html" class="nav-item"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
+</nav>
+
+<script src="js/tu_dong_hoa.js"></script>
+</body>
+</html>
