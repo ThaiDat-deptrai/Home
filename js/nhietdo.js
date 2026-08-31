@@ -19,16 +19,15 @@
     };
 
     // ===== DỮ LIỆU NHIỆT ĐỘ =====
-    // Khởi tạo với giá trị null để biết chưa có dữ liệu
     let tempData = [];
     let mqttClient = null;
     let mqttConnected = false;
-    let dataReceived = false; // Cờ đánh dấu đã nhận được dữ liệu lần đầu
+    let dataReceived = false;
 
     function initTempData() {
         tempData = Object.keys(tempTopics).map(label => ({
             label: label,
-            value: null, // null = chưa có dữ liệu
+            value: null,
             topic: tempTopics[label]
         }));
     }
@@ -99,7 +98,6 @@
 
             const tempDisplay = document.createElement('div');
             tempDisplay.className = 'gauge-temp';
-            // Nếu chưa có dữ liệu -> hiển thị "-- °C"
             if (item.value === null) {
                 tempDisplay.innerHTML = `--<span class="unit">°C</span>`;
                 tempDisplay.style.opacity = '0.5';
@@ -107,14 +105,12 @@
             } else {
                 tempDisplay.innerHTML = `${Math.round(item.value)}<span class="unit">°C</span>`;
                 tempDisplay.style.opacity = '1';
-                // Màu dựa theo nhiệt độ
                 let color;
                 if (item.value < 20) color = '#00f2fe';
                 else if (item.value < 30) color = '#38ef7d';
                 else if (item.value < 36) color = '#f5a623';
                 else color = '#ff0844';
                 progress.style.stroke = color;
-                // Cập nhật dashoffset
                 const percent = Math.min(100, Math.max(0, (item.value / 40) * 100));
                 const offset = circumference - (percent / 100) * circumference;
                 progress.style.strokeDashoffset = offset;
@@ -124,7 +120,6 @@
             container.appendChild(label);
             container.appendChild(tempDisplay);
 
-            // Lưu tham chiếu để cập nhật sau
             container._progress = progress;
             container._tempDisplay = tempDisplay;
 
@@ -133,7 +128,7 @@
     }
 
     // ===== VẼ BIỂU ĐỒ XU HƯỚNG =====
-    let chartData = []; // Lưu lịch sử nhiệt độ để vẽ biểu đồ
+    let chartData = [];
 
     function drawChart() {
         const width = canvas.parentElement.clientWidth - 40;
@@ -144,13 +139,12 @@
         canvas.style.height = height + 'px';
         ctx.scale(2, 2);
 
-        // Nếu chưa có dữ liệu -> hiển thị thông báo
         if (!dataReceived || chartData.length === 0) {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#4a5a7a';
             ctx.font = '16px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('⏳ Đang chờ dữ liệu từ ESP...', width / 2, height / 2);
+            ctx.fillText('⏳ Đang chờ dữ liệu nhiệt độ...', width / 2, height / 2);
             return;
         }
 
@@ -164,7 +158,6 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        // Vẽ lưới
         ctx.strokeStyle = 'rgba(255,255,255,0.2)';
         ctx.lineWidth = 0.5;
         for (let i = 0; i < 5; i++) {
@@ -175,7 +168,6 @@
             ctx.stroke();
         }
 
-        // Vẽ đường nhiệt độ
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#2c6bff';
         ctx.beginPath();
         ctx.strokeStyle = primaryColor;
@@ -191,7 +183,6 @@
         });
         ctx.stroke();
 
-        // Vẽ điểm dữ liệu
         chartData.forEach((point, i) => {
             const x = padding.left + (i / (chartData.length - 1 || 1)) * chartWidth;
             const y = padding.top + chartHeight - ((point.value - minTemp) / (maxTemp - minTemp)) * chartHeight;
@@ -204,7 +195,6 @@
             ctx.stroke();
         });
 
-        // Nhãn trục X (giờ)
         ctx.fillStyle = '#4a5a7a';
         ctx.font = '12px sans-serif';
         ctx.textAlign = 'center';
@@ -214,7 +204,6 @@
             ctx.fillText(chartData[i].time || i + 'h', x, height - 5);
         }
 
-        // Nhãn trục Y (nhiệt độ)
         ctx.textAlign = 'right';
         for (let i = 0; i < 5; i++) {
             const val = minTemp + (maxTemp - minTemp) * (1 - i / 4);
@@ -230,16 +219,27 @@
             item.value = value;
             dataReceived = true;
 
-            // Thêm vào lịch sử biểu đồ (giới hạn 24 điểm)
             const now = new Date();
             const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
             chartData.push({ value: value, time: timeStr });
             if (chartData.length > 24) chartData.shift();
 
-            // Render lại giao diện
             renderGauges();
             drawChart();
         }
+    }
+
+    // ===== GỬI YÊU CẦU NHIỆT ĐỘ ĐẾN MASTER =====
+    function requestTemperature() {
+        if (!mqttConnected || !mqttClient) {
+            console.warn('⚠️ MQTT chưa kết nối, không gửi được yêu cầu');
+            return;
+        }
+        const msg = new Paho.MQTT.Message("{}");
+        msg.destinationName = "nha/nhiet-do/yeu-cau";
+        mqttClient.send(msg);
+        console.log('📤 Đã gửi yêu cầu nhiệt độ đến Master');
+        showToast('⏳ Đang lấy dữ liệu nhiệt độ...');
     }
 
     // ===== MQTT =====
@@ -271,6 +271,8 @@
                 mqttConnected = true;
                 console.log('✅ Đã kết nối HiveMQ Cloud');
                 subscribeAllTopics();
+                // Sau khi kết nối, tự động yêu cầu nhiệt độ
+                setTimeout(requestTemperature, 1000);
             },
             onFailure: function(err) {
                 mqttConnected = false;
@@ -291,7 +293,6 @@
     function handleMQTTMessage(topic, payload) {
         try {
             const data = JSON.parse(payload);
-            // Tìm label tương ứng với topic
             for (const [label, t] of Object.entries(tempTopics)) {
                 if (t === topic) {
                     const temp = parseFloat(data.temperature) || parseFloat(data.temp) || parseFloat(data.value);
@@ -313,13 +314,13 @@
         drawChart();
         connectMQTT();
 
-        // Nút refresh
+        // Nút Refresh
         document.getElementById('refreshBtn').addEventListener('click', function() {
             this.classList.add('fa-spin');
+            requestTemperature();
             setTimeout(() => {
                 this.classList.remove('fa-spin');
-                showToast('Đang chờ dữ liệu mới từ ESP...');
-            }, 600);
+            }, 3000);
         });
 
         // Resize biểu đồ
@@ -355,6 +356,5 @@
     `;
     document.head.appendChild(style);
 
-    // Bắt đầu
     init();
 })();
