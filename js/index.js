@@ -1,6 +1,45 @@
 (function() {
     'use strict';
 
+    // ===== HÀM XÓA DẤU TIẾNG VIỆT =====
+    function removeAccents(str) {
+        const map = {
+            'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+            'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+            'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+            'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+            'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+            'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+            'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+            'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+            'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+            'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+            'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+            'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            'đ': 'd',
+            'Á': 'A', 'À': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+            'Ă': 'A', 'Ắ': 'A', 'Ằ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+            'Â': 'A', 'Ấ': 'A', 'Ầ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+            'É': 'E', 'È': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+            'Ê': 'E', 'Ế': 'E', 'Ề': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+            'Í': 'I', 'Ì': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+            'Ó': 'O', 'Ò': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+            'Ô': 'O', 'Ố': 'O', 'Ồ': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+            'Ơ': 'O', 'Ớ': 'O', 'Ờ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+            'Ú': 'U', 'Ù': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+            'Ư': 'U', 'Ứ': 'U', 'Ừ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+            'Ý': 'Y', 'Ỳ': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+            'Đ': 'D'
+        };
+        return str.replace(/[^a-zA-Z0-9 ]/g, function(ch) {
+            return map[ch] || ch;
+        });
+    }
+
+    function normalizeSceneName(name) {
+        return removeAccents(name).toUpperCase().replace(/ /g, '_');
+    }
+
     // ===== DANH SÁCH THIẾT BỊ CỐ ĐỊNH =====
     const baseDevices = {
         'phong-ngu-1': [
@@ -100,7 +139,7 @@
         clientId: "WebDashboard_" + Math.random().toString(16).substr(2, 8)
     };
 
-    // ===== MAPPING ROOM & DEVICE (TIẾNG VIỆT) =====
+    // ===== MAPPING ROOM & DEVICE =====
     const topicMapping = {
         'phong-ngu-1': {
             'Đèn ngủ': { cmd: 'nha/phong-ngu-1/den-ngu/cmd', state: 'nha/phong-ngu-1/den-ngu/state' },
@@ -204,10 +243,7 @@
             return false;
         }
 
-        // Chuyển tên kịch bản thành mã
-        const sceneCode = sceneData.name.toUpperCase().replace(/ /g, '_');
-
-        // Tạo payload
+        const sceneCode = normalizeSceneName(sceneData.name);
         const actions = sceneData.devices.map(item => ({
             room: getRoomId(item.room),
             device: getDeviceId(item.room, item.name),
@@ -234,16 +270,8 @@
             return;
         }
 
-        const sceneCode = sceneName.toUpperCase().replace(/ /g, '_');
-        const sceneMap = {
-            'XEM_PHIM': 'XEM_PHIM',
-            'DI_NGU': 'DI_NGU',
-            'ROI_NHA': 'ROI_NHA',
-            'TIEC_TUNG': 'TIEC_TUNG'
-        };
-        const finalCode = sceneMap[sceneCode] || sceneCode;
-
-        const payload = JSON.stringify({ scene: finalCode });
+        const sceneCode = normalizeSceneName(sceneName);
+        const payload = JSON.stringify({ scene: sceneCode });
         const topic = "nha/kich-ban/lenh";
         const msg = new Paho.MQTT.Message(payload);
         msg.destinationName = topic;
@@ -258,7 +286,6 @@
             return;
         }
 
-        // 1. Cập nhật giao diện (bật/tắt ảo trên web)
         if (sceneData.devices) {
             sceneData.devices.forEach(item => {
                 const room = item.room;
@@ -274,7 +301,6 @@
             });
         }
 
-        // 2. Cập nhật giao diện
         const activeRoom = document.querySelector('.room-btn.active');
         if (activeRoom) {
             renderDevices(activeRoom.dataset.room);
@@ -287,12 +313,8 @@
             }
         }
 
-        // 3. Gửi cấu hình xuống Master (để Master lưu vào SPIFFS)
         sendSceneConfig(sceneData);
-
-        // 4. Gửi lệnh chạy kịch bản
         sendSceneCommand(sceneData.name);
-
         showToast(`✅ Đã chạy kịch bản "${sceneData.name}"`);
     }
 
@@ -484,7 +506,6 @@
                 allTopics.push(topicMapping[room][device].state);
             }
         }
-        // Thêm topic nhận cấu hình (để biết Master đã nhận thành công - tùy chọn)
         allTopics.push('nha/kich-ban/phan-hoi');
         allTopics.forEach(topic => {
             mqttClient.subscribe(topic);
@@ -496,13 +517,11 @@
         try {
             const data = JSON.parse(payload);
             
-            // Kiểm tra phản hồi từ Master (nếu có)
             if (topic === 'nha/kich-ban/phan-hoi') {
                 console.log('📥 Phản hồi từ Master:', data);
                 return;
             }
             
-            // Tìm device từ topic state
             for (const room in topicMapping) {
                 for (const deviceName in topicMapping[room]) {
                     if (topicMapping[room][deviceName].state === topic) {
@@ -551,7 +570,6 @@
         loadSettings();
         connectMQTT();
         
-        // Export function để kichban.js gọi
         window.sendSceneConfig = sendSceneConfig;
         window.mqttConnected = () => mqttConnected;
         window.applyScene = applyScene;
@@ -628,6 +646,5 @@
     styleAnim.textContent = `@keyframes fadeInDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`;
     document.head.appendChild(styleAnim);
 
-    // Bắt đầu
     init();
 })();
